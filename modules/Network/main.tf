@@ -1,6 +1,6 @@
 resource "azurerm_resource_group" "rg" {
   name     = "rg-core-resource"
-  location = "eastus"
+  location = "northcentralus"
 }
 
 

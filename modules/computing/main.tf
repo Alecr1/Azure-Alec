@@ -1,6 +1,6 @@
 resource "azurerm_resource_group" "rg" {
   name     = "rg-core-resource"
-  location = "eastus"
+  location = "northcentralus"
 }
 
 ##################################
@@ -23,7 +23,7 @@ resource "azurerm_virtual_machine" "Core_linux_vm" {
   location            = azurerm_resource_group.rg.location
   resource_group_name = azurerm_resource_group.rg.name
   network_interface_ids = [azurerm_network_interface.core_nic.id]
-  vm_size = "Standard_B1s"
+  vm_size = "Standard_D2s_v3"
 
 
 storage_image_reference {
@@ -33,14 +33,14 @@ storage_image_reference {
   version   = "latest"
 }
 storage_os_disk {
-  name              = "myosdisk1"
+  name              = "Core_storage_disk"
   caching           = "ReadWrite"
   create_option     = "FromImage"
   managed_disk_type = "Standard_LRS"
 }
   os_profile {
-    computer_name  = "Alec_linux"
-    admin_username = "admin"
+    computer_name  = "corevm"
+    admin_username = "coreadmin"
     admin_password = "1zqa2xws!ZQA@XWS"
   }
   os_profile_linux_config {
@@ -67,7 +67,7 @@ resource "azurerm_virtual_machine" "spoke_linux_vm" {
   location            = azurerm_resource_group.rg.location
   resource_group_name = azurerm_resource_group.rg.name
   network_interface_ids = [azurerm_network_interface.Spoke_nic.id]
-  vm_size = "Standard_B1s"
+  vm_size = "Standard_D2s_v3"
 
 storage_image_reference {
   publisher = "Canonical"
@@ -76,14 +76,14 @@ storage_image_reference {
   version   = "latest"
 }
 storage_os_disk {
-  name              = "myosdisk1"
+  name              = "spoke_storage_disk"
   caching           = "ReadWrite"
   create_option     = "FromImage"
   managed_disk_type = "Standard_LRS"
 }
   os_profile {
-    computer_name  = "Alec_linux"
-    admin_username = "admin"
+    computer_name  = "spokeuser"
+    admin_username = "spokeadmin"
     admin_password = "1zqa2xws!ZQA@XWS"
   }
   os_profile_linux_config {
