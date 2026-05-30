@@ -19,6 +19,12 @@ resource "azurerm_subnet" "core_internal" {
   virtual_network_name = azurerm_virtual_network.core_vnet.name
   address_prefixes     = ["10.0.0.0/24"]
 }
+
+
+###########NSG######
+
+
+
 resource "azurerm_network_security_group" "Allows_in_core" {
   name                = "Allows_in_core"
   location            = azurerm_resource_group.rg.location
@@ -107,4 +113,39 @@ resource "azurerm_virtual_network_peering" "SpokeVnet-CoreVnet" {
   resource_group_name       = azurerm_resource_group.rg.name
   virtual_network_name      = azurerm_virtual_network.spoke_vnet.name
   remote_virtual_network_id = azurerm_virtual_network.core_vnet.id
+}
+
+
+#### start of public IPs ###
+
+resource "azurerm_public_ip" "hub_pub_IP" {
+  name                = "hub-pub_IP"
+  location            = azurerm_resource_group.rg.location
+  resource_group_name = azurerm_resource_group.rg.name
+  allocation_method   = "Static"
+  sku                 = "Standard"
+}
+####### load balancer in HUB ####
+resource "azurerm_lb" "hub_lb" {
+  name                = "hub-loadbalancer"
+  location            = azurerm_resource_group.rg.location
+  resource_group_name = azurerm_resource_group.rg.name
+  sku                 = "Standard"
+
+  frontend_ip_configuration {
+    name                 = "Public_Frontend_IP"
+    public_ip_address_id = azurerm_public_ip.hub_pub_IP.id
+  }
+}
+resource "azurerm_lb_backend_address_pool" "hub_backend" {
+  name                = "hub-backend_pool"
+  loadbalancer_id     = azurerm_lb.hub_lb.id
+  resource_group_name = azurerm_resource_group.rg.name
+}
+resource "azurerm_lb_probe" "hub_probe" {
+  name                = "hub-healthprobe"
+  resource_group_name = azurerm_resource_group.rg.name
+  loadbalancer_id     = azurerm_lb.hub_lb.id
+  protocol            = "Tcp"
+  port                = 80
 }
